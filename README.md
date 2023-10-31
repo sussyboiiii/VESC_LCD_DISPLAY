@@ -1,2 +1,14 @@
-# vesc_ebike_lcd
-Modified version of Tom Stantons vesc lcd ebike repo (https://github.com/TomStanton/VESC_LCD_EBIKE)
+# vesc_lcd
+Some Arduino code for viewing stats of your VESC 6 on an I2C 4x20 LCD Screen.
+
+You need:
+- VESC 6
+- Arduino
+- 4x20 I2C LCD
+
+Optional:
+- Buck Boost Converter (for stable voltage)
+- Capacitor
+- 10k at 25°C NTC for ambient temperature measurment
+- RTC as clock
+
