@@ -7,8 +7,7 @@ You need:
 - 4x20 I2C LCD
 
 Optional:
-- Buck Boost Converter (for stable voltage)
-- Capacitor
+- Buck Boost Converter with elko parallel to input pins (for stable voltage)
 - 10k at 25°C NTC for ambient temperature measurment
 - RTC as clock
 
