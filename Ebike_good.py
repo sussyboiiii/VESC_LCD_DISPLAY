@@ -7,7 +7,7 @@ host = "localhost"
 port = 65432
 s1 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-server_process = subprocess.Popen(["python", "/Users/dennisruff/Documents/Programming/Python/LCD/lcd.py"])
+server_process = subprocess.Popen(["python", "./lcd.py"])
 
 # Wait for the server to start
 time.sleep(1) 
