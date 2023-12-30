@@ -27,9 +27,9 @@ The main Arduino sketch for the project is `Ebike.ino`. This sketch controls the
 
 ## LCD Emulator for testing
 
-The `lcdem` directory contains a Python-based LCD emulator. This emulator can be used to test the LCD display functions without needing an actual Arduino or LCD screen. The main scripts for the emulator are `Ebike_good.py` and `lcd.py`.
+The `lcdem` directory contains a Python-based LCD emulator. This emulator can be used to test the LCD display functions without needing an actual Arduino or LCD screen. The main scripts for the emulator are `Ebike.py` and `lcd.py`. To run the emulator you need to type `python3 ebike.py` in your terminal and everything should be up and running!
 
-`Ebike_good.py` is a script that simulates the data that would be sent from the Arduino to the LCD screen. It sends data to `lcd.py`, which emulates the LCD screen and displays the data.
+`Ebike.py` is a script that simulates the data that would be sent from the Arduino to the LCD screen. It sends data to `lcd.py`, which emulates the LCD screen and displays the data.
 
 ## Contributing
 
