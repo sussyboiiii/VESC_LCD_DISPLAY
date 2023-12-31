@@ -9,8 +9,8 @@
 
   ///// Variables /////
 
-const int abtemp = A1;
-const int bttemp = A2;
+const int ambientTempPin = A1;
+const int batteryTempPin = A2;
 
 const int SW = 2;
 
@@ -41,8 +41,8 @@ bool istrip = true;
 
   ///// Init /////
 
-THERMISTOR thermistorab(abtemp, 10000, 3988, 10000);
-THERMISTOR thermistorbt(bttemp, 10000, 3988, 10000);
+THERMISTOR thermistorab(ambientTempPin, 10000, 3988, 10000);
+THERMISTOR thermistorbt(batteryTempPin, 10000, 3988, 10000);
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
@@ -157,9 +157,9 @@ pinMode(SW, INPUT);
 
 rtc.begin();
 
-// The following lines can be uncommented to set the date and time
+// The following lines can be uncommented to set the date and displayTime
   // rtc.setDOW(FRIDAY);     // Set Day-of-Week to FRIDAY
-  // rtc.setTime(13, 27,40);     // Set the time to 12:00:00 (24hr format)
+  // rtc.setTime(13, 27,40);     // Set the displayTime to 12:00:00 (24hr format)
   // rtc.setDate(26);     // Set date
 
 EEPROM.get(0, date);
@@ -236,34 +236,34 @@ lcd.write(3);
 
 void loop() {
 
-  checksw();
+  checkSwitch();
 
   unsigned long currentMillis = millis();
 
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
 
-    getvesc();
-    velocity();
-    batterypercent();
-    batteryvoltage();
-    powerout();
-    amps();
-    amphoursused();
-    // batterytemp();
-    motortemp();
-    mosfettemp();
-    time();
-    ambienttemp();
-    trip();
+    getVescValues();
+    displayVelocity();
+    displayBatteryPercentage();
+    displayBatteryVoltage();
+    displayPowerOutput();
+    displayCurrent();
+    displayAmphoursUsed();
+    // displayBatteryTemp();
+    displayMotorTemp();
+    displayMosfetTemp();
+    displayTime();
+    displayAmbientTemp();
+    displayTripDistance();
     }
 }
 
-void checksw() {
+void checkSwitch() {
   
-  if (digitalRead(SW) == 1){
-    lcd.clear();
-    lcd.setBacklight(0);
+  if (digitalRead(SW) == HIGH){
+    // lcd.clear();
+    // lcd.setBacklight(0);
 
     if (istrip) {
       date = char(rtc.getDateStr());
@@ -277,12 +277,12 @@ void checksw() {
   }
 }
 
-void getvesc() {
+void getVescValues() {
   if (VESC.getVescValues()){
     rpm = (VESC.data.rpm)/23;                       // The '23' is the number of pole pairs in the motor. This motor has 46 poles, therefore 23 pole pairs
     voltage = (VESC.data.inpVoltage);
     current = (VESC.data.avgMotorCurrent);
-    powerfiltered = powerfilter.updateEstimate(voltage*current);
+    if (voltage*current != 0) {powerfiltered = powerfilter.updateEstimate(voltage*current);}
     amphour = (VESC.data.ampHours);
     watthour = amphour*voltage;
     tach = (VESC.data.tachometerAbs)/138;           // The '138' is the number of motor poles multiplied by 3
@@ -296,12 +296,12 @@ void getvesc() {
 
   ///// 1st line /////
 
-void velocity() {
+void displayVelocity() {
   lcd.setCursor(0, 0);
   if (speed <= 0){
-    speed = 0;
+    lcd.print(0.00, 2);
   }
-  if (speed < 10){
+  else if (speed < 10){
     lcd.print(" ");
     lcd.print(speed, 2); 
   }
@@ -313,123 +313,98 @@ void velocity() {
   }
 }
 
-void batterypercent() {
+void displayBatteryPercentage() {
   lcd.setCursor(9, 0);
   if (batterypercentage < 10){
     lcd.print("  ");
-    lcd.print(batterypercentage, 0);
   }
   else if(batterypercentage < 100){
     lcd.print(" ");
-    lcd.print(batterypercentage, 0);
   }
-  else if (batterypercentage == 100){
-    lcd.print(batterypercentage, 0);
-  }
+  lcd.print(batterypercentage, 0);
 }
 
-void batteryvoltage() {
+void displayBatteryVoltage() {
   lcd.setCursor(15, 0);
   lcd.print(voltage, 1);
 }
 
   ///// 2nd line /////
 
-void powerout() {
+void displayPowerOutput() {
   lcd.setCursor(2, 1);
   if (powerfiltered < 10){
     lcd.print("   ");
-    lcd.print(powerfiltered, 0);
   }
   else if (powerfiltered < 100){
     lcd.print("  ");
-    lcd.print(powerfiltered, 0);
   }
   else if (powerfiltered < 1000){
     lcd.print(" ");
-    lcd.print(powerfiltered, 0);
   }
-  else if (powerfiltered > 999){
-    lcd.print(powerfiltered, 0);
-  }
+  lcd.print(powerfiltered, 0);
 }
 
-void amps() {
+void displayCurrent() {
   lcd.setCursor(9, 1);
   if (current < 10){
     lcd.print("  ");
-    lcd.print(current, 0);
   }
   else if (current < 100){
     lcd.print(" ");
-    lcd.print(current, 0);
   }
-  else if (current > 99){
-    lcd.print(current, 0);
-  }
+  lcd.print(current, 0);
 }
 
-void amphoursused() {
+void displayAmphoursUsed() {
   lcd.setCursor(15,1);
   lcd.print(amphour, 2);
 }
 
   ///// 3rd line /////
 
-void batterytemp() {
+void displayBatteryTemp() {
   tempbattery = thermistorbt.read();
   lcd.setCursor(2, 2);
   if (tempbattery < 10){
     lcd.print("  ");
-    lcd.print(tempbattery, 0);
   }
   else if (tempbattery < 100){
     lcd.print(" ");
-    lcd.print(tempbattery, 0);
   }
-  else if (tempbattery > 99){
-    lcd.print(tempbattery, 0);
-  }
+  lcd.print(tempbattery, 0);
 }
 
-void motortemp() {
+void displayMotorTemp() {
   lcd.setCursor(8, 2);
   if (tempmotor < 10){
     lcd.print("  ");
-    lcd.print(tempmotor, 0);
   }
   else if (tempmotor < 100){
     lcd.print(" ");
-    lcd.print(tempmotor, 0);
   }
-  else if (tempmotor > 99){
-    lcd.print(tempmotor, 0);
-  }
+  lcd.print(tempmotor, 0);
 }
 
-void mosfettemp() {
+void displayMosfetTemp() {
   lcd.setCursor(15, 2);
   if (tempmosfet < 10){
     lcd.print("  ");
-    lcd.print(tempmosfet, 0);
   }
   else if (tempmosfet < 100){
     lcd.print(" ");
-    lcd.print(tempmosfet, 0);
   }
-  else if (tempmosfet > 99){
-    lcd.print(tempmosfet, 0);
-  }
+  lcd.print(tempmosfet, 0);
 }
 
   ///// 4th line /////
 
-void time() {
+void displayTime() {
   lcd.setCursor(0, 3);
   lcd.print(rtc.getTimeStr());
 }
 
-void ambienttemp() {
+void displayAmbientTemp() {
   temperature = thermistorab.read();
   lcd.setCursor(9, 3);
 
@@ -457,17 +432,13 @@ void ambienttemp() {
   }
 }
 
-void trip() {
+void displayTripDistance() {
   lcd.setCursor(14, 3);
   if (tripdistance < 10){
     lcd.print("  ");
-    lcd.print(tripdistance, 1);
     }
   else if (tripdistance < 100){
     lcd.print(" ");
-    lcd.print(tripdistance, 1);
     }
-  else if (tripdistance > 99){
-    lcd.print(tripdistance, 1);
-  }
+  lcd.print(tripdistance, 1);
 }
