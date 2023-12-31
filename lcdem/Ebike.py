@@ -2,12 +2,13 @@ import subprocess
 import socket
 import time
 import json
+from datetime import datetime
 from chars import*
 host = "localhost"
 port = 65432
 s1 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-server_process = subprocess.Popen(["python3", "./lcd.py"])
+server_process = subprocess.Popen(["python", "./lcdem/lcd.py"])
 
 # Wait for the server to start
 time.sleep(1) 
@@ -197,8 +198,8 @@ def loop():
         tempmosfet = 0
 
     # 4th line
-        
-    writechar("12:58:15", 0, 3)
+    currentDateAndTime = datetime.now()
+    writechar(currentDateAndTime.strftime("%H:%M:%S"), 0, 3)
 
     if temperature < -99:
         writechar(f"-99", 9, 3)
@@ -231,5 +232,5 @@ if __name__ == "__main__":
     while True:
         if server_process.poll() is not None:
             break
-        time.sleep(0.01)
+        time.sleep(0.1)
         loop()
