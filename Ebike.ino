@@ -408,28 +408,16 @@ void displayAmbientTemp() {
   temperature = thermistorab.read();
   lcd.setCursor(9, 3);
 
-  if (temperature < -99){
-    lcd.print(-99); 
-  }
-  else if (temperature < -10 && temperature > -100){
-    lcd.print(temperature, 0); 
-  }
-  else if (temperature < 0 && temperature > -9){
+  if (temperature < 0 && temperature > -9){
     lcd.print(" ");
-    lcd.print(temperature, 0); 
   }
   else if (temperature < 9 && temperature > 0){
     lcd.print("  ");
-    lcd.print(temperature, 0); 
   }
   else if (temperature > 10 && temperature < 100){
     lcd.print(" ");
-    lcd.print(temperature, 0); 
   }
-  else if (temperature > 99){
-    lcd.print(" ");
-    lcd.print(99); 
-  }
+  lcd.print(temperature, 0); 
 }
 
 void displayTripDistance() {
