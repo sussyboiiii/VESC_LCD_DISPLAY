@@ -15,7 +15,7 @@ const int batteryTempPin = A2;
 const int SW = 2;
 
 unsigned long previousMillis = 0;
-const long interval = 50;
+const int interval = 50;
 
 char date;
 float rpm;

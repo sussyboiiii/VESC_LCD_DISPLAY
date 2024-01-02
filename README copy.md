@@ -21,15 +21,19 @@ Optional components include (adjustments to `Ebike.ino` may be required):
 - [Buck Boost Converter](https://amzn.eu/d/1i72zAF)
 - [10k at 25°C NTC Thermistor](https://amzn.eu/d/2FOsBCA) (Adjust B value in `Ebike.ino` to your sensor!)
 
+## Schematic
+This is the circuit schematic I am using, feel free to use it and modify the way it works!
+![Complete assembly of all components](schematic/schematic.png)
+
 ## Main Arduino Sketch
 
 The main Arduino sketch for the project is `Ebike.ino`. This sketch controls the behavior of the E-Bike, including reading data from the VESC and displaying it on the LCD screen.
 
 ## LCD Emulator for testing
 
-The `lcdem` directory contains a Python-based LCD emulator. This emulator can be used to test the LCD display functions without needing an actual Arduino or LCD screen. The main scripts for the emulator are `Ebike.py` and `lcd.py`. To run the emulator you need to type `python3 ebike.py` in your terminal and everything should be up and running!
+The `lcdem` directory contains a Python-based LCD emulator. This emulator can be used to test the LCD display functions without needing an actual Arduino or LCD screen. The main scripts for the emulator are `Ebike_good.py` and `lcd.py`.
 
-`Ebike.py` is a script that simulates the data that would be sent from the Arduino to the LCD screen. It sends data to `lcd.py`, which emulates the LCD screen and displays the data.
+`Ebike_good.py` is a script that simulates the data that would be sent from the Arduino to the LCD screen. It sends data to `lcd.py`, which emulates the LCD screen and displays the data.
 
 ## Contributing
 
