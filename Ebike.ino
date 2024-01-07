@@ -21,20 +21,14 @@ char date;
 float rpm;
 float voltage;
 float current;
-float power;
-int   powerpercent;
 float powerfiltered;
 float amphour;
 float tach;
 float speed;
 float watthour;
 float batterypercentage;
-float averagespeed;
-float timedriving;
-float temperature;
 float tempmotor;
 float tempmosfet;
-float tempbattery;
 float tripdistance;
 float lasttrip;
 bool istrip = true;
@@ -106,8 +100,8 @@ byte dgC[] = { // °C
   B01000,
   B01000,
   B01000,
-  B01000,
-  B00111
+  B00111,
+  B00000
 };
 
 byte k[] = { // kilometer
@@ -229,7 +223,7 @@ lcd.write(5);
 lcd.setCursor(19, 3);
 lcd.write(2);
 
-// Ambient temperature
+// Ambient temp
 lcd.setCursor(12, 3);
 lcd.write(3);
 }
@@ -250,7 +244,7 @@ void loop() {
     displayPowerOutput();
     displayCurrent();
     displayAmphoursUsed();
-    // displayBatteryTemp();
+    displayBatteryTemp();
     displayMotorTemp();
     displayMosfetTemp();
     displayTime();
@@ -282,7 +276,7 @@ void getVescValues() {
     rpm = (VESC.data.rpm)/23;                       // The '23' is the number of pole pairs in the motor. This motor has 46 poles, therefore 23 pole pairs
     voltage = (VESC.data.inpVoltage);
     current = (VESC.data.avgMotorCurrent);
-    if (voltage*current != 0) {powerfiltered = powerfilter.updateEstimate(voltage*current);}
+    if (voltage*current != 0) {powerfiltered = powerfilter.updateEstimate(voltage*current);} else {powerfiltered = 0;}
     amphour = (VESC.data.ampHours);
     watthour = amphour*voltage;
     tach = (VESC.data.tachometerAbs)/138;           // The '138' is the number of motor poles multiplied by 3
@@ -297,104 +291,171 @@ void getVescValues() {
   ///// 1st line /////
 
 void displayVelocity() {
-  lcd.setCursor(0, 0);
-  if (speed <= 0){
-    lcd.print(0.00, 2);
+  lcd.setCursor(1, 0);
+  float velocity = roundDecimal(speed, 1);
+  if (velocity <= 0){
+    lcd.print(0.0);
+    return;
   }
-  else if (speed < 10){
+  else if (velocity < 10){
     lcd.print(" ");
-    lcd.print(speed, 2); 
   }
-  else if (speed < 100){
-    lcd.print(speed, 2);
+  else if (velocity > 99.9){
+    lcd.print("   ");
+    lcd.print("!");
+    return;
   }
-  else if (speed > 99){
-    lcd.print(99.99);
-  }
+  lcd.print(velocity, 1);
 }
 
 void displayBatteryPercentage() {
   lcd.setCursor(9, 0);
-  if (batterypercentage < 10){
+  float percentage = roundDecimal(batterypercentage, 0);
+  if (percentage < 10){
     lcd.print("  ");
   }
-  else if(batterypercentage < 100){
+  else if(percentage < 100){
     lcd.print(" ");
   }
-  lcd.print(batterypercentage, 0);
+  else {
+    lcd.print("  ");
+    lcd.print("!");
+    return;
+  }
+  lcd.print(percentage, 0);
 }
 
 void displayBatteryVoltage() {
   lcd.setCursor(15, 0);
-  lcd.print(voltage, 1);
+  if (voltage < 99.9 && voltage > 0){
+    lcd.print(voltage, 1);
+  }
+  else {
+    lcd.print("   ");
+    lcd.print("!");
+  }
 }
 
   ///// 2nd line /////
 
 void displayPowerOutput() {
   lcd.setCursor(2, 1);
-  if (powerfiltered < 10){
+  float power = roundDecimal(powerfiltered, 0);
+  if (power < 10){
     lcd.print("   ");
   }
-  else if (powerfiltered < 100){
+  else if (power < 100){
     lcd.print("  ");
   }
-  else if (powerfiltered < 1000){
+  else if (power < 1000){
     lcd.print(" ");
   }
-  lcd.print(powerfiltered, 0);
+  else if (power < 10000){}
+  else {
+    lcd.print("   ");
+    lcd.print("!");
+    return;
+  }
+  lcd.print(power, 0);
 }
 
 void displayCurrent() {
   lcd.setCursor(9, 1);
-  if (current < 10){
+  float amps = roundDecimal(current, 0);
+  if (amps < 10){
     lcd.print("  ");
   }
-  else if (current < 100){
+  else if (amps < 100){
     lcd.print(" ");
   }
-  lcd.print(current, 0);
+  else if (amps > 999){
+    lcd.print("  ");
+    lcd.print("!");
+    return;
+  }
+  lcd.print(amps, 0);
 }
 
 void displayAmphoursUsed() {
-  lcd.setCursor(15,1);
-  lcd.print(amphour, 2);
+  lcd.setCursor(14,1);
+  float amphrs = roundDecimal(amphour, 1);
+  if (amphrs < 10){
+    lcd.print("  ");
+  }
+  else if (amphrs < 100){
+    lcd.print(" ");
+  }
+  else if (amphrs > 999){
+    lcd.print("    ");
+    lcd.print("!");
+    return;
+  }
+  lcd.print(amphrs, 1);
 }
 
   ///// 3rd line /////
 
 void displayBatteryTemp() {
-  tempbattery = thermistorbt.read();
   lcd.setCursor(2, 2);
-  if (tempbattery < 10){
-    lcd.print("  ");
-  }
-  else if (tempbattery < 100){
+  float temp = roundDecimal(thermistorbt.read(), 0);
+  if (temp > -100 && temp < -9){}
+  else if (temp < 0 && temp > -9){
     lcd.print(" ");
   }
-  lcd.print(tempbattery, 0);
+  else if (temp < 10 && temp > -1){
+    lcd.print("  ");
+  }
+  else if (temp > 9 && temp < 100){
+    lcd.print(" ");
+  }
+  else {
+    lcd.print("  ");
+    lcd.print("!");
+    return;
+  }
+  lcd.print(temp, 0); 
 }
 
 void displayMotorTemp() {
   lcd.setCursor(8, 2);
-  if (tempmotor < 10){
-    lcd.print("  ");
-  }
-  else if (tempmotor < 100){
+  float temp = roundDecimal(tempmotor, 0);
+  if (temp > -100 && temp < -9){}
+  else if (temp < 0 && temp > -9){
     lcd.print(" ");
   }
-  lcd.print(tempmotor, 0);
+  else if (temp < 10 && temp > -1){
+    lcd.print("  ");
+  }
+  else if (temp > 9 && temp < 100){
+    lcd.print(" ");
+  }
+  else {
+    lcd.print("  ");
+    lcd.print("!");
+    return;
+  }
+  lcd.print(temp, 0); 
 }
 
 void displayMosfetTemp() {
   lcd.setCursor(15, 2);
-  if (tempmosfet < 10){
-    lcd.print("  ");
-  }
-  else if (tempmosfet < 100){
+  float temp = roundDecimal(tempmosfet, 0);
+  if (temp > -100 && temp < -9){}
+  else if (temp < 0 && temp > -9){
     lcd.print(" ");
   }
-  lcd.print(tempmosfet, 0);
+  else if (temp < 10 && temp > -1){
+    lcd.print("  ");
+  }
+  else if (temp > 9 && temp < 100){
+    lcd.print(" ");
+  }
+  else {
+    lcd.print("  ");
+    lcd.print("!");
+    return;
+  }
+  lcd.print(temp, 0); 
 }
 
   ///// 4th line /////
@@ -405,28 +466,44 @@ void displayTime() {
 }
 
 void displayAmbientTemp() {
-  temperature = thermistorab.read();
   lcd.setCursor(9, 3);
-
-  if (temperature < 0 && temperature > -9){
+  float temp = roundDecimal(thermistorab.read(), 0);
+  if (temp > -100 && temp < -9){}
+  else if (temp < 0 && temp > -9){
     lcd.print(" ");
   }
-  else if (temperature < 9 && temperature > 0){
+  else if (temp < 10 && temp > -1){
     lcd.print("  ");
   }
-  else if (temperature > 10 && temperature < 100){
+  else if (temp > 9 && temp < 100){
     lcd.print(" ");
   }
-  lcd.print(temperature, 0); 
+  else {
+    lcd.print("  ");
+    lcd.print("!");
+    return;
+  }
+  lcd.print(temp, 0); 
 }
 
 void displayTripDistance() {
   lcd.setCursor(14, 3);
-  if (tripdistance < 10){
+  float distance = roundDecimal(tripdistance, 1);
+  if (distance < 10 && distance >= 0){
     lcd.print("  ");
-    }
-  else if (tripdistance < 100){
+  }
+  else if (distance < 100){
     lcd.print(" ");
-    }
-  lcd.print(tripdistance, 1);
+  }
+  else if (distance > 999 || distance < 0){
+    lcd.print("    ");
+    lcd.print("!");
+    return;
+  }
+  lcd.print(distance, 1);
+}
+
+float roundDecimal(float value, int places) {
+    float scale = pow(10.0, places);
+    return round(value * scale) / scale;
 }
